@@ -87,7 +87,7 @@ class Player:
         elif self.choice == 'wave' and enemy.choice == 'defense':
             return 'tie'  
         
-        elif self.choice[:3] == 'cut' and self.choice == 'cut e':
+        elif enemy.choice[:3] == 'cut' and self.choice == 'cut e':
             if (int(self.choice[-1]) - 1) <= self.energy['cut e']:
                 return 'tie'
         elif (self.choice in attack) and (enemy.choice in non_attack):
