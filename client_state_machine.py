@@ -1,3 +1,8 @@
+"""
+Created on Sun Apr  5 00:00:32 2015
+
+@author: zhengzhang
+"""
 from chat_utils import *
 import json
 import os
@@ -167,7 +172,7 @@ class ClientSM:
                             self.out_msg += 'changing state'
                             self.state = S_GAME
                         except:
-                            self.out_msg += 'something wrong 1'
+                            self.out_msg += 'something wrong with connection'
                 else:
                     self.out_msg += peer_msg["from"] + peer_msg["message"]
 
@@ -184,7 +189,7 @@ class ClientSM:
                 if len(peer_msg) > 0:
                     print('got message')
                     peer_msg = json.loads(peer_msg)
-                    print(peer_msg)
+#                    print(peer_msg)
                     if peer_msg['connect'] == True:
                         msg = peer_msg['message']
                         self.out_msg += msg + '\n'
@@ -201,7 +206,7 @@ class ClientSM:
                     mysend(self.s,json.dumps({'action':'game','connect':True, 'choice':int(my_msg)}))
                     self.out_msg += 'message sent, choice is ' + str(my_msg)
             except:
-                self.out_msg += 'something wrong 2'
+                self.out_msg += 'something wrong in game'
                 
                 
                 

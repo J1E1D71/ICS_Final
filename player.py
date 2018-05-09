@@ -8,38 +8,38 @@ Created on Mon Apr 30 18:56:08 2018
 class Player:
     def __init__(self,name):
         self.name = name
-        self.energy = {'cut':0,'wave':0}
-        self.options = ['defense','wave e','cut e']
+        self.energy = {'wave':0,'stone':0}
+        self.options = ['defense wave','wave energy +1','stone +1']
         self.choice = ''
     
     def update(self):
 
-        if self.choice == 'defense':
+        if self.choice == 'defense wave':
             pass
         
-        elif self.choice == 'wave e':
+        elif self.choice == 'wave energy +1':
             self.set_energy('wave',1)
         
-        elif self.choice == 'cut e':
-            self.set_energy('cut',1)
+        elif self.choice == 'stone +1':
+            self.set_energy('stone',1)
         
-        elif self.choice == 'wave':
+        elif self.choice == 'wave 1':
             self.set_energy('wave',-1)
         
-        elif self.choice == 'cut':
-            self.set_energy('cut',-1)
+        elif self.choice == 'stone 1':
+            self.set_energy('stone',-1)
         
         elif self.choice == 'wave 2':
             self.set_energy('wave',-2)
         
-        elif self.choice == 'cut 2':
-            self.set_energy('cut',-2)
+        elif self.choice == 'stone 2':
+            self.set_energy('stone',-2)
             
         elif self.choice == 'wave 3':
             self.set_energy('wave',-3)
         
-        elif self.choice == 'cut 3':
-            self.set_energy('cut',-3)
+        elif self.choice == 'stone 3':
+            self.set_energy('stone',-3)
         
         self.add_opition()
         
@@ -48,15 +48,24 @@ class Player:
         self.energy[kind] += change
     
     def add_opition(self):
-        for i in ['wave','cut']:
-            if (self.energy[i] == 1) and (i not in self.options):
-                self.options.append(i) 
+        attack = ['stone 1','wave 1','stone 2','wave 2','stone 3','wave 3']
+        for i in ['wave','stone']:
+            if (self.energy[i] == 1) and (str(i+' 1') not in self.options):
+                self.options.append(str(i+' 1')) 
             
             elif (self.energy[i] == 2) and ( str(i+' 2') not in self.options):
                 self.options.append(str(i+' 2')) 
             
-            elif (self.energy[i] == 3) and ((i+' 3') not in self.options):
+            elif (self.energy[i] == 3) and (str(i+' 3') not in self.options):
                 self.options.append(str(i+' 3')) 
+        for i in self.options:
+            if i in attack:
+                try:
+                    value = int(i[-1])
+                except:
+                    value = 1
+                if value > self.energy[i[:5].strip()]:
+                    self.options.remove(i)
             
             
     def set_choice(self,num):
@@ -70,26 +79,29 @@ class Player:
         self.choice = ''
     
     def fight(self,enemy):
-        non_attack = ['defense','wave e','cut e']
-        attack = ['cut','wave','cut 2','wave 2','cut 3','wave 3']
+        non_attack = ['defense wave','wave energy +1','stone +1']
+        attack = ['stone 1','wave 1','stone 2','wave 2','stone 3','wave 3']
         if self.choice == enemy.choice:
             return 'tie'
         
         elif (self.choice in non_attack) and (enemy.choice in non_attack):
             return 'tie'
         
-        elif self.choice == 'defense':
+        elif self.choice == 'defense wave':
             return 'tie' if enemy.choice == 'wave' else False
 
         elif (self.choice in attack) and (enemy.choice in attack):
             return True if (attack.index(self.choice) > attack.index(enemy.choice)) else False
 
-        elif self.choice == 'wave' and enemy.choice == 'defense':
+        elif self.choice == 'wave' and enemy.choice == 'defense wave':
             return 'tie'  
         
-        elif enemy.choice[:3] == 'cut' and self.choice == 'cut e':
-            if (int(self.choice[-1]) - 1) <= self.energy['cut e']:
+        elif enemy.choice[:5] == 'stone' and self.choice == 'stone +1':
+            if (int(enemy.choice[-1]) - 1) <= self.energy['stone']:
                 return 'tie'
+            else:
+                return False
+
         elif (self.choice in attack) and (enemy.choice in non_attack):
             return True
         
@@ -97,7 +109,9 @@ class Player:
             return False
 
 a = Player('new')
-      
+b = Player('old')      
+        
+        
         
         
         

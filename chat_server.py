@@ -1,3 +1,9 @@
+"""
+Created on Tue Jul 22 00:47:05 2014
+
+@author: alina, zzhang
+"""
+
 import time
 import socket
 import select
@@ -178,7 +184,14 @@ class Server:
 # =============================================================================
 #               Try to start a game                
 # =============================================================================
+            
             elif msg['action'] == 'game':
+                rules = 'select one option from the list each time \n'
+                rules += "\ndefense wave: defend wave(can NOT defend greater wave and any stone!) \n"
+                rules += "wave energy +1: save energy to send a (greater) wave next round \n"
+                rules += "stone +1: fetch a stone to throw in next round \n"
+                rules += "In the same round, wave beats stone, stone 2 beats wave \n"
+                rules += "If your enemy throws a stone to you when you are fetching a stone, you'll be protected by your stone \n "
                 from_name = self.logged_sock2name[from_sock]
                 the_other = self.group.list_me(from_name)[1]
                 if msg['connect'] == False:
@@ -193,7 +206,7 @@ class Server:
                         try:
                             for g in self.group.list_me(from_name):
                                 to_sock = self.logged_name2sock[g]
-                                mysend(to_sock,json.dumps({"action":"game","connect":True,"message":'There you go.\n'}))
+                                mysend(to_sock,json.dumps({"action":"game","connect":True,"message":'There you go.\n'+rules}))
                                 print("Connecting two players")
                         except:
                             print('no way')
@@ -213,9 +226,9 @@ class Server:
                             print('choice set for '+ str(from_name)+' '+self.players[from_name].choice)
                             if (self.players[the_other].choice != ''):
                                 print('both have choice')
-#                                two_choice = ''
-#                                for k,v in self.players.values():
-#                                    two_choice += k + str(v.choice)
+                                two_choice = ''
+                                for p in self.players.values():
+                                    two_choice += (p.name + ': ' + p.choice + '  ')
                                 result = self.players[from_name].fight(self.players[the_other])
                                 print('got result')
                                 
@@ -229,20 +242,20 @@ class Server:
                                         self.players[g].clear_choice()
                                         print('finding sock')
                                         to_sock = self.logged_name2sock[g]
-                                        mysend(to_sock,json.dumps({"action":"game","connect":True,"message":'tie','options':self.players[g].get_option()}))
+                                        mysend(to_sock,json.dumps({"action":"game","connect":True,"message":'tie' +'  '+ two_choice ,'options':self.players[g].get_option()}))
                                         print('tie, sending msgs to '+ str(g))
                                 
                                 my_sock = self.logged_name2sock[from_name]
                                 to_sock = self.logged_name2sock[the_other]
                                 if result == True:
                                     result = ''
-                                    mysend(my_sock,json.dumps({"action":"game","connect":False,"message":'you win'}))
-                                    mysend(to_sock,json.dumps({"action":"game","connect":False,"message":'you lose'}))
+                                    mysend(my_sock,json.dumps({"action":"game","connect":False,"message":'you win'+'  '+two_choice}))
+                                    mysend(to_sock,json.dumps({"action":"game","connect":False,"message":'you lose''  '+two_choice}))
                                     self.players = {}
                                 elif result == False:
                                     result = ''
-                                    mysend(my_sock,json.dumps({"action":"game","connect":False,"message":'you lose'}))
-                                    mysend(to_sock,json.dumps({"action":"game","connect":False,"message":'you win'}))
+                                    mysend(my_sock,json.dumps({"action":"game","connect":False,"message":'you lose'+'  '+two_choice}))
+                                    mysend(to_sock,json.dumps({"action":"game","connect":False,"message":'you win'+'  '+two_choice}))
                                     self.players = {}
                             else:
                                 print('NOT both have choice')
@@ -284,3 +297,4 @@ def main():
     server.run()
 
 main()
+
