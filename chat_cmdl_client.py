@@ -9,5 +9,6 @@ def main():
     args.d = '10.209.3.65'
     client = Client(args)
     client.run_chat()
+    # fuck martin
 
 main()
