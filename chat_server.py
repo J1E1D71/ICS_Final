@@ -216,8 +216,8 @@ class Server:
 #                                two_choice = ''
 #                                for k,v in self.players.values():
 #                                    two_choice += k + str(v.choice)
-#                                result = self.players[from_name].fight(self.players[the_other])
-#                                print('got result')
+                                result = self.players[from_name].fight(self.players[the_other])
+                                print('got result')
                                 
                                 while result == 'tie':
                                     print('result is tie')
