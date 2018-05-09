@@ -1,9 +1,3 @@
-"""
-Created on Tue Jul 22 00:47:05 2014
-
-@author: alina, zzhang
-"""
-
 import time
 import socket
 import select
@@ -14,6 +8,7 @@ import json
 import pickle as pkl
 from chat_utils import *
 import chat_group as grp
+import player
 
 class Server:
     def __init__(self):
@@ -33,7 +28,7 @@ class Server:
         self.sonnet_f = open('AllSonnets.txt.idx', 'rb')
         self.sonnet = pkl.load(self.sonnet_f)
         self.sonnet_f.close()
-
+        self.players = {}
     def new_client(self, sock):
         #add to all sockets and to new clients
         print('new client...')
@@ -174,6 +169,91 @@ class Server:
 #==============================================================================
 #                 the "from" guy really, really has had enough
 #==============================================================================
+            elif msg['action'] == 'file exchange':
+                from_name = self.logged_sock2name[from_sock]
+                the_guys = self.group.list_me(from_name)
+                for g in the_guys[1:]:
+                    to_sock = self.logged_name2sock[g]
+                    mysend(to_sock, json.dumps({"action":"file exchange", "from":msg["from"], "file":msg["file"]}))
+# =============================================================================
+#               Try to start a game                
+# =============================================================================
+            elif msg['action'] == 'game':
+                from_name = self.logged_sock2name[from_sock]
+                the_other = self.group.list_me(from_name)[1]
+                if msg['connect'] == False:
+                    if len(self.group.list_me(from_name)) != 2:
+                        mysend(from_sock,json.dumps({"action":"game","connect":False,"message":'Too many people here.'}))
+                        other_guys = self.group.list_me(from_name)[1:]
+                        for g in other_guys:
+                            to_sock = self.logged_name2sock[g]
+                            print('connection failed')
+                            mysend(to_sock,json.dumps({"action":"game","connect":False,"message":'Too many people here.'}))
+                    else:
+                        try:
+                            for g in self.group.list_me(from_name):
+                                to_sock = self.logged_name2sock[g]
+                                mysend(to_sock,json.dumps({"action":"game","connect":True,"message":'There you go.\n'}))
+                                print("Connecting two players")
+                        except:
+                            print('no way')
+                else:
+                    try:
+                        if from_name not in self.players:
+                            print('found a new player')
+                            print('creating object')
+                            self.players[from_name] = player.Player(str(from_name))
+                            print('adding to the list')
+                            mysend(from_sock,json.dumps({"action":"game",'options':self.players[from_name].get_option(),'connect':True,'message':"select one option"}))
+                            print('sending message')
+                        else:
+                            print('find'+from_name)
+                            print(self.players[from_name].choice)
+                            self.players[from_name].set_choice(msg['choice'])
+                            print('choice set for '+ str(from_name)+' '+self.players[from_name].choice)
+                            if (self.players[the_other].choice != ''):
+                                print('both have choice')
+#                                two_choice = ''
+#                                for k,v in self.players.values():
+#                                    two_choice += k + str(v.choice)
+#                                result = self.players[from_name].fight(self.players[the_other])
+#                                print('got result')
+                                
+                                while result == 'tie':
+                                    print('result is tie')
+                                    result = ''
+                                    for g in self.group.list_me(from_name):
+                                        print(g)
+                                        print('updating info')
+                                        self.players[g].update()
+                                        self.players[g].clear_choice()
+                                        print('finding sock')
+                                        to_sock = self.logged_name2sock[g]
+                                        mysend(to_sock,json.dumps({"action":"game","connect":True,"message":'tie','options':self.players[g].get_option()}))
+                                        print('tie, sending msgs to '+ str(g))
+                                
+                                my_sock = self.logged_name2sock[from_name]
+                                to_sock = self.logged_name2sock[the_other]
+                                if result == True:
+                                    result = ''
+                                    mysend(my_sock,json.dumps({"action":"game","connect":False,"message":'you win'}))
+                                    mysend(to_sock,json.dumps({"action":"game","connect":False,"message":'you lose'}))
+                                    self.players = {}
+                                elif result == False:
+                                    result = ''
+                                    mysend(my_sock,json.dumps({"action":"game","connect":False,"message":'you lose'}))
+                                    mysend(to_sock,json.dumps({"action":"game","connect":False,"message":'you win'}))
+                                    self.players = {}
+                            else:
+                                print('NOT both have choice')
+                                pass
+                    except:
+                        print('dont work')
+                                
+                                        
+# =============================================================================
+#                 send files via sever    
+# =============================================================================
 
         else:
             #client died unexpectedly
@@ -199,7 +279,6 @@ class Server:
                #new client request
                sock, address=self.server.accept()
                self.new_client(sock)
-
 def main():
     server=Server()
     server.run()
