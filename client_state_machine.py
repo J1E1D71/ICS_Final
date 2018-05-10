@@ -3,6 +3,11 @@ Created on Sun Apr  5 00:00:32 2015
 
 @author: zhengzhang
 """
+"""
+Created on Sun Apr  5 00:00:32 2015
+
+@author: zhengzhang
+"""
 from chat_utils import *
 import json
 import os
@@ -103,6 +108,10 @@ class ClientSM:
                         self.out_msg += poem + '\n\n'
                     else:
                         self.out_msg += 'Sonnet ' + poem_idx + ' not found\n\n'
+                elif my_msg [:12]=="write a poem":
+                    mysend(self.s,json.dumps({"action":"write"}))
+                    sentence = json.loads(myrecv(self.s))["results"].strip()
+                    self.out_msg += sentence
 
                 else:
                     self.out_msg += menu
@@ -172,7 +181,7 @@ class ClientSM:
                             self.out_msg += 'changing state'
                             self.state = S_GAME
                         except:
-                            self.out_msg += 'something wrong with connection'
+                            self.out_msg += 'something wrong 1'
                 else:
                     self.out_msg += peer_msg["from"] + peer_msg["message"]
 
@@ -206,7 +215,7 @@ class ClientSM:
                     mysend(self.s,json.dumps({'action':'game','connect':True, 'choice':int(my_msg)}))
                     self.out_msg += 'message sent, choice is ' + str(my_msg)
             except:
-                self.out_msg += 'something wrong in game'
+                self.out_msg += 'something wrong 2'
                 
                 
                 

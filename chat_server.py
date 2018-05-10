@@ -15,6 +15,7 @@ import pickle as pkl
 from chat_utils import *
 import chat_group as grp
 import player
+import generator
 
 class Server:
     def __init__(self):
@@ -160,6 +161,11 @@ class Server:
                 search_rslt = (self.indices[from_name].search(term)).strip()
                 print('server side search: ' + search_rslt)
                 mysend(from_sock, json.dumps({"action":"search", "results":search_rslt}))
+# =============================================================================
+#  write poem
+# =============================================================================
+            elif msg["action"] == "write":
+                mysend(from_sock, json.dumps({"action":"write", "results":generator.generator()}))
 #==============================================================================
 # the "from" guy has had enough (talking to "to")!
 #==============================================================================
@@ -297,4 +303,5 @@ def main():
     server.run()
 
 main()
+
 
