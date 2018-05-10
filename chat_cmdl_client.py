@@ -6,7 +6,7 @@ def main():
     parser = argparse.ArgumentParser(description='chat client argument')
     parser.add_argument('-d', type=str, default=None, help='server IP addr')
     args = parser.parse_args()
-    args.d = '10.209.3.65'
+    args.d = '10.209.13.27'
     client = Client(args)
     client.run_chat()
 
